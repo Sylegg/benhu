@@ -1,125 +1,288 @@
-import React, { useState } from 'react';
-import { invitationData } from '../data/invitationData';
-import { Mail, Heart } from 'lucide-react';
-import { Flower2 } from 'lucide-react';
+import { FormEvent, useState } from "react";
+import {
+  Check,
+  Heart,
+  LoaderCircle,
+  Send,
+  X,
+} from "lucide-react";
 
-export const RSVPFormSection: React.FC = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    attendance: 'Sẽ tham dự đúng giờ!',
-    message: ''
-  });
+type AttendanceStatus =
+  | "attending"
+  | "not_attending";
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Temporary logic for demonstration
-    alert(`Cảm ơn ${formData.name}! Lời chúc của bạn đã được gửi. (Đây là bản demo giao diện)`);
+interface RsvpFormData {
+  fullName: string;
+  attendance: AttendanceStatus;
+  message: string;
+}
+
+const INITIAL_FORM: RsvpFormData = {
+  fullName: "",
+  attendance: "attending",
+  message: "",
+};
+
+export const RSVPFormSection = () => {
+  const [formData, setFormData] =
+    useState<RsvpFormData>(INITIAL_FORM);
+
+  const [isSubmitting, setIsSubmitting] =
+    useState(false);
+
+  const [isSuccess, setIsSuccess] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const scriptUrl = import.meta.env.VITE_RSVP_SCRIPT_URL as string | undefined;
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    setError("");
+
+    if (!formData.fullName.trim()) {
+      setError("Vui lòng nhập họ và tên.");
+      return;
+    }
+
+    if (!scriptUrl) {
+      setError(
+        "Chưa cấu hình VITE_RSVP_SCRIPT_URL.",
+      );
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const body = new URLSearchParams({
+        fullName: formData.fullName.trim(),
+        attendance: formData.attendance,
+        message: formData.message.trim(),
+      });
+
+      const response = await fetch(scriptUrl, {
+        method: "POST",
+        mode: "no-cors",
+        body,
+      });
+
+      /*
+       * Với no-cors, response.type sẽ là "opaque".
+       * Điều này chỉ xác nhận trình duyệt đã gửi request,
+       * không xác nhận Google Sheet đã ghi thành công.
+       */
+      console.log("RSVP request sent:", {
+        responseType: response.type,
+        fullName: formData.fullName.trim(),
+        attendance: formData.attendance,
+        message: formData.message.trim(),
+      });
+
+      setIsSuccess(true);
+      setFormData(INITIAL_FORM);
+    } catch (submitError) {
+      console.error(submitError);
+
+      setError(
+        "Không thể gửi xác nhận. Vui lòng thử lại.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <section className="relative w-full max-w-[600px] mx-auto mt-12 mb-16 animate-fade-in-up delay-500 z-10">
-      <div className="relative bg-cream rounded-xl p-8 md:p-10 border-rose-gold shadow-realistic z-0">
-        {/* Subtle background texture */}
-        <div className="absolute inset-0 texture-paper-grain pointer-events-none rounded-xl z-0" />
-        
-        {/* Decorative images */}
-        <img className="absolute w-[64px] top-[10px] left-[-15px] -rotate-12 z-20 animate-float-slow drop-shadow-md" src="/images/no.png" alt="" aria-hidden="true" />
-        <img className="absolute w-[58px] right-[-10px] top-[40%] rotate-[18deg] z-20 animate-butterfly drop-shadow-md" src="/images/buom.png" alt="" aria-hidden="true" />
-        
-        {/* Header */}
-        <div className="relative z-10 text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Flower2 size={20} className="text-rose-400 animate-float-slow" fill="currentColor" />
-            <h2 className="font-serif text-deep-rose text-2xl md:text-3xl font-bold tracking-wide effect-rose-gold-foil">
-              Xác Nhận & Gửi Lời Chúc
+    <>
+      {isSuccess && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#85525c]/30 backdrop-blur-sm p-4">
+          <section className="relative w-full max-w-sm rounded-[2rem] border border-[#e8b7c0] bg-[#fffaf6] px-6 py-12 text-center shadow-[0_20px_60px_rgba(170,80,100,0.3)]">
+            <img 
+              src="/images/generated/butterfly-single.png" 
+              alt="" 
+              aria-hidden="true"
+              className="absolute -right-5 top-1/2 w-10 -translate-y-1/2 object-contain opacity-70 drop-shadow-sm" 
+              style={{ transform: 'rotate(15deg)' }}
+            />
+
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#bd596d] text-white shadow-lg">
+              <Check size={30} />
+            </div>
+
+            <h2 className="mt-5 font-serif text-3xl text-[#a64257]">
+              Cảm ơn bạn đã xác nhận
             </h2>
-            <Flower2 size={20} className="text-rose-400 animate-float-slow delay-200" fill="currentColor" />
-          </div>
-          <p className="font-serif text-muted-brown text-sm md:text-base">
-            Hãy để lại lời nhắn chúc mừng cho <strong className="text-deep-rose font-bold">{invitationData.graduate.name}</strong> nhé! <Heart size={14} className="inline text-rose-400" fill="currentColor" />
-          </p>
+
+            <p className="mt-3 leading-7 text-[#79575e]">
+              Thông tin của bạn đã được ghi nhận.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setIsSuccess(false)}
+              className="group mt-7 inline-flex items-center justify-center gap-2 rounded-full border border-[#d89aa6] px-6 py-3 font-medium text-[#a64257] transition hover:bg-[#fff0f3] hover:shadow-sm"
+            >
+              <img 
+                src="/images/generated/butterfly-single.png" 
+                alt="" 
+                className="w-5 object-contain opacity-80 transition-transform duration-300 group-hover:-rotate-12 group-hover:scale-110 drop-shadow-sm" 
+                style={{ transform: 'rotate(-10deg)' }}
+              />
+              Gửi xác nhận khác
+              <img 
+                src="/images/generated/butterfly-single.png" 
+                alt="" 
+                className="w-5 object-contain opacity-80 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110 drop-shadow-sm" 
+                style={{ transform: 'rotate(10deg)' }}
+              />
+            </button>
+          </section>
+        </div>
+      )}
+
+
+    <section className="relative mx-auto w-full max-w-lg overflow-hidden rounded-[2rem] border border-[#e8b7c0] bg-[#fffaf6] p-6 shadow-[0_20px_60px_rgba(170,80,100,0.16)] sm:p-9 z-10 mb-16 mt-2">
+      <div
+        aria-hidden="true"
+        className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[#f7d8de]/70 blur-2xl"
+      />
+
+      <header className="relative text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[#e4adb8] bg-[#fdecef] text-[#b74f64]">
+          <Heart size={22} />
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="relative z-10 flex flex-col gap-5">
-          {/* Name Input */}
-          <div>
-            <label htmlFor="name" className="rsvp-label">
-              Tên của bạn là gì? <span className="text-rose-400">*</span>
-            </label>
-            <input
-              type="text"
-              id="name"
-              required
-              className="princess-input"
-              placeholder="Nhập họ tên của bạn..."
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-          </div>
+        <h2 className="mt-4 font-serif text-3xl text-[#a64257] sm:text-4xl">
+          Xác nhận tham dự
+        </h2>
 
-          {/* Attendance Select */}
-          <div>
-            <label htmlFor="attendance" className="rsvp-label">
-              Bạn tham dự cùng Như chứ? <span className="text-rose-400">*</span>
-            </label>
-            <div className="relative">
-              <select
-                id="attendance"
-                className="princess-input appearance-none cursor-pointer"
-                value={formData.attendance}
-                onChange={(e) => setFormData({ ...formData, attendance: e.target.value })}
-              >
-                <option value="Sẽ tham dự đúng giờ!">💖 Sẽ tham dự đúng giờ!</option>
-                <option value="Chưa chắc chắn">✨ Mình sẽ cố gắng sắp xếp</option>
-                <option value="Không thể tham dự">🥺 Tiếc quá, mình bận mất rồi</option>
-              </select>
-              {/* Custom arrow for select */}
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-rose-400">
-                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-          </div>
+        <p className="mx-auto mt-3 max-w-sm leading-7 text-[#806067]">
+          Sự hiện diện của bạn sẽ làm ngày đặc
+          biệt này thêm trọn vẹn.
+        </p>
+      </header>
 
-          {/* Message Textarea */}
-          <div>
-            <label htmlFor="message" className="rsvp-label">
-              Lời chúc gửi đến Quỳnh Như <Heart size={12} className="inline text-rose-300" strokeWidth={3} />
-            </label>
-            <textarea
-              id="message"
-              rows={3}
-              className="princess-input resize-none"
-              placeholder="Chúc Như tốt nghiệp rực rỡ, ngày càng xinh đẹp và thành công..."
-              value={formData.message}
-              onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-            />
-            {/* Small floating hearts decoration behind textarea */}
-            <div className="absolute right-8 mt-2 animate-float-slow pointer-events-none">
-              <Heart size={10} className="text-rose-200" fill="currentColor" opacity={0.6} />
-            </div>
-            <div className="absolute right-12 mt-6 animate-float-very-slow pointer-events-none">
-              <Heart size={14} className="text-rose-100" fill="currentColor" opacity={0.5} />
-            </div>
-          </div>
+      <form
+        onSubmit={handleSubmit}
+        className="relative mt-8 space-y-6"
+      >
+        <div>
+          <label
+            htmlFor="fullName"
+            className="mb-2 block text-sm font-semibold text-[#85525c]"
+          >
+            Họ và tên
+          </label>
 
-          {/* Submit Button */}
-          <div className="mt-4 flex justify-center">
-            <button
-              type="submit"
-              className="relative group overflow-hidden w-full md:w-auto px-12 py-3 rounded-full border border-champagne-gold/60 shadow-realistic transition-transform hover:-translate-y-1"
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            required
+            maxLength={100}
+            value={formData.fullName}
+            onChange={(event) =>
+              setFormData((current) => ({
+                ...current,
+                fullName: event.target.value,
+              }))
+            }
+            placeholder="Nhập họ và tên của bạn"
+            className="w-full rounded-2xl border border-[#ecd0d5] bg-white/85 px-4 py-3.5 text-[#603f46] outline-none transition placeholder:text-[#bca5aa] focus:border-[#c96e80] focus:ring-4 focus:ring-[#f5d7dd]"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="attendance"
+            className="mb-2 block text-sm font-semibold text-[#85525c]"
+          >
+            Bạn có tham dự không?
+          </label>
+
+          <div className="relative">
+            <select
+              id="attendance"
+              name="attendance"
+              value={formData.attendance}
+              onChange={(event) =>
+                setFormData((current) => ({
+                  ...current,
+                  attendance: event.target.value as AttendanceStatus,
+                }))
+              }
+              className="w-full appearance-none rounded-2xl border border-[#ecd0d5] bg-white/85 px-4 py-3.5 text-[#603f46] outline-none transition focus:border-[#c96e80] focus:ring-4 focus:ring-[#f5d7dd]"
             >
-              <div className="absolute inset-0 satin-ribbon-gradient opacity-90 group-hover:opacity-100 transition-opacity" />
-              <div className="relative z-10 flex items-center justify-center gap-2 text-white font-serif tracking-widest font-bold uppercase text-sm">
-                <Mail size={16} strokeWidth={2.5} />
-                Gửi Lời Chúc
-              </div>
-            </button>
+              <option value="attending">Tham dự</option>
+              <option value="not_attending">Không tham dự</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#85525c]">
+              <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="message"
+            className="mb-2 block text-sm font-semibold text-[#85525c]"
+          >
+            Lời chúc gửi đến bạn
+          </label>
+
+          <textarea
+            id="message"
+            name="message"
+            rows={3}
+            value={formData.message}
+            onChange={(event) =>
+              setFormData((current) => ({
+                ...current,
+                message: event.target.value,
+              }))
+            }
+            placeholder="Chúc mừng tốt nghiệp rực rỡ..."
+            className="w-full resize-none rounded-2xl border border-[#ecd0d5] bg-white/85 px-4 py-3.5 text-[#603f46] outline-none transition placeholder:text-[#bca5aa] focus:border-[#c96e80] focus:ring-4 focus:ring-[#f5d7dd]"
+          />
+        </div>
+
+        {error && (
+          <p
+            role="alert"
+            className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#aa4258] via-[#c65f73] to-[#aa4258] px-6 py-4 font-semibold text-white shadow-[0_12px_30px_rgba(178,70,92,0.3)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_35px_rgba(178,70,92,0.4)] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? (
+            <>
+              <LoaderCircle
+                size={19}
+                className="animate-spin"
+              />
+              Đang gửi...
+            </>
+          ) : (
+            <>
+              <Send size={18} />
+              Gửi xác nhận
+            </>
+          )}
+        </button>
+      </form>
     </section>
+    </>
   );
 };

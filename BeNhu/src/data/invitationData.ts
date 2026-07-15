@@ -7,14 +7,14 @@ export const invitationData = {
     secondaryPhoto: '/images/graduate-secondary.png',
   },
   event: {
-    time: '09:30',
+    time: '9h30 - 11h',
     period: 'Sáng',
-    dayOfWeek: 'THỨ BẢY',
-    date: '27.06.2026',
-    fullDate: 'Thứ Bảy, ngày 27 tháng 06 năm 2026',
+    dayOfWeek: 'CHỦ NHẬT',
+    date: '09/08/2026',
+    fullDate: 'Chủ Nhật, ngày 09 tháng 08 năm 2026',
     location: {
       name: 'Van Lang University',
-      address: '69/68 Đ. Đặng Thùy Trâm, An Nhơn, Hồ Chí Minh 70000',
+      address: 'Tòa J, 69/68 Đ. Đặng Thùy Trâm, An Nhơn,\nHồ Chí Minh',
     },
   },
   messages: {
@@ -27,7 +27,7 @@ export const invitationData = {
     sideMessage: 'Cùng nhau chia sẻ\nniềm vui trong ngày\nđặc biệt này nhé!',
     invitationGreeting: 'Thân mời',
     invitationRecipient: 'ANH/CHỊ, BẠN BÈ YÊU QUÝ',
-    invitationBody: 'Đến tham dự buổi tiệc mừng lễ tốt nghiệp của',
+    invitationBody: 'Đến tham dự lễ tốt nghiệp của',
     closingLine1: 'RẤT HÂN HẠNH',
     closingLine2: 'ĐƯỢC ĐÓN TIẾP!',
     envelopeMessage: "Let's celebrate\nthis special day\ntogether!",
