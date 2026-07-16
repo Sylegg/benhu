@@ -180,8 +180,9 @@ const GraduationInvitation: React.FC = () => {
           <div className="details-closing">
             <p>Rất hân hạnh<br />được đón tiếp! <Heart size={13} fill="currentColor" /></p>
             <div className="celebrate-note">
-              <span>Liên hệ</span>
-              <span>0909876902 - Vũ</span>
+              <span className="celebrate-tape">Liên hệ</span>
+              <span>0909876902</span>
+              <span>Minh Vũ</span>
             </div>
           </div>
 
