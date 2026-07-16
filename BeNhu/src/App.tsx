@@ -5,14 +5,20 @@ import { MusicPlayer } from './components/MusicPlayer';
 
 const App: React.FC = () => {
   const [isOpened, setIsOpened] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
 
   return (
     <>
-      <div className="invitation-content">
+      <div className={`invitation-content ${!isOpening && !isOpened ? 'is-covered' : ''}`}>
         <GraduationInvitation />
         {isOpened && <MusicPlayer />}
       </div>
-      {!isOpened && <InvitationCover onOpen={() => setIsOpened(true)} />}
+      {!isOpened && (
+        <InvitationCover
+          onOpening={() => setIsOpening(true)}
+          onOpen={() => setIsOpened(true)}
+        />
+      )}
     </>
   );
 };

@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Heart, Sparkles } from 'lucide-react';
 
 type InvitationCoverProps = {
+  onOpening: () => void;
   onOpen: () => void;
 };
 
-export const InvitationCover: React.FC<InvitationCoverProps> = ({ onOpen }) => {
+export const InvitationCover: React.FC<InvitationCoverProps> = ({ onOpening, onOpen }) => {
   const [isOpening, setIsOpening] = useState(false);
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export const InvitationCover: React.FC<InvitationCoverProps> = ({ onOpen }) => {
   const handleOpen = () => {
     if (isOpening) return;
     setIsOpening(true);
+    onOpening();
     window.setTimeout(onOpen, 1750);
   };
 
