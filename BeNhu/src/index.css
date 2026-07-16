@@ -1,6 +1,260 @@
 @import "tailwindcss";
 
 /* ============================================
+   OPENING INVITATION COVER
+   ============================================ */
+body.cover-visible {
+  overflow: hidden;
+}
+
+.invitation-cover {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  background: #f6c7ce;
+  transition: background .7s ease;
+}
+
+.invitation-cover.is-opening {
+  background: rgba(249, 224, 231, .58);
+  animation: opening-veil-fade 1.75s linear forwards;
+  backdrop-filter: blur(5px);
+  pointer-events: none;
+}
+
+.invitation-cover-art,
+.cover-copy,
+.cover-shimmer {
+  transition: opacity .45s ease, transform .7s cubic-bezier(.22, 1, .36, 1), filter .55s ease;
+}
+
+.invitation-cover.is-opening .invitation-cover-art {
+  opacity: 0;
+  filter: brightness(1.04);
+  transform: scale(1.018);
+  transition: opacity .38s ease, transform .65s ease, filter .38s ease;
+}
+
+.invitation-cover.is-opening .cover-copy {
+  opacity: 0;
+  transform: scale(.97);
+  transition: opacity .24s ease, transform .38s ease;
+}
+
+.invitation-cover.is-opening .cover-shimmer { opacity: 0; }
+
+.invitation-cover-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+.cover-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: min(78vw, 720px);
+  min-height: 54vh;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  margin-top: clamp(70px, 10vh, 125px);
+  color: #754c49;
+  text-align: center;
+  text-shadow: 0 1px rgba(255,255,255,.8);
+}
+
+.cover-invitation,
+.cover-message {
+  font-family: var(--font-cormorant);
+  font-size: clamp(13px, 1.8vw, 21px);
+  line-height: 1.45;
+}
+
+.cover-invitation {
+  position: relative;
+  padding: 5px clamp(16px, 3vw, 32px) 6px;
+  color: #8d5c58;
+  background: radial-gradient(ellipse at center, rgba(255, 250, 244, .94) 0%, rgba(255, 250, 244, .72) 58%, transparent 78%);
+  text-shadow: 0 1px 0 #fff, 0 2px 7px rgba(121, 72, 67, .12);
+}
+
+.cover-copy h1 {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  margin: clamp(13px, 2vh, 24px) 0 8px;
+  color: #cd5b7a;
+  font-family: var(--font-great-vibes);
+  font-size: clamp(60px, 9.2vw, 106px);
+  font-weight: 400;
+  letter-spacing: -.025em;
+  line-height: .74;
+  text-shadow:
+    2px 0 #fff9f6,
+    -2px 0 #fff9f6,
+    0 2px #fff9f6,
+    0 -2px #fff9f6,
+    0 5px 13px rgba(176, 63, 92, .26),
+    0 0 22px rgba(255, 226, 234, .95);
+}
+
+.cover-copy h1 span {
+  display: block;
+  white-space: nowrap;
+}
+
+.cover-copy h1 span:last-child {
+  margin-top: .07em;
+  font-size: 1.08em;
+}
+
+.cover-name-ornament {
+  display: flex;
+  width: min(72%, 340px);
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0 20px;
+  color: #d28b68;
+}
+
+.cover-name-ornament i {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, #dfa47f);
+}
+
+.cover-name-ornament i:nth-of-type(2) { transform: scaleX(-1); }
+.cover-name-ornament b:last-child { transform: scaleX(-1); }
+.cover-name-ornament b { font-size: 15px; font-weight: 400; }
+.cover-name-ornament span { color: #d85d7c; font-size: 17px; }
+
+.open-invitation-btn {
+  display: flex;
+  width: min(78%, 330px);
+  min-height: 62px;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  margin-top: clamp(17px, 3vh, 30px);
+  border: 2px solid #f4d19d;
+  border-radius: 999px;
+  color: #fffdf9;
+  background: linear-gradient(180deg, #f49ab0 0%, #d95778 52%, #e87e99 100%);
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.28), 0 7px 0 #b97866, 0 14px 25px rgba(126, 49, 71, .25);
+  font-family: var(--font-serif);
+  font-size: clamp(19px, 2.6vw, 28px);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  animation: cover-button-pulse 2.6s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.open-invitation-btn:hover { filter: brightness(1.06); transform: translateY(-3px); }
+.open-invitation-btn:active { box-shadow: inset 0 0 0 3px rgba(255,255,255,.25), 0 3px 0 #b97866, 0 8px 15px rgba(126,49,71,.2); transform: translateY(3px); }
+.open-invitation-btn:focus-visible { outline: 3px solid rgba(181,73,102,.42); outline-offset: 5px; }
+
+.cover-shimmer { position: absolute; z-index: 3; inset: 0; pointer-events: none; }
+.cover-shimmer i { position: absolute; width: 13px; aspect-ratio: 1; background: white; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); filter: drop-shadow(0 0 6px #fff); animation: cover-twinkle 2.2s ease-in-out infinite; }
+.cover-shimmer i:nth-child(1) { top: 12%; left: 15%; }
+.cover-shimmer i:nth-child(2) { top: 20%; right: 12%; animation-delay: .8s; }
+.cover-shimmer i:nth-child(3) { top: 49%; left: 8%; animation-delay: 1.3s; }
+.cover-shimmer i:nth-child(4) { top: 58%; right: 9%; animation-delay: .3s; }
+.cover-shimmer i:nth-child(5) { bottom: 13%; left: 23%; animation-delay: 1.6s; }
+.cover-shimmer i:nth-child(6) { bottom: 8%; right: 20%; animation-delay: .6s; }
+
+.opening-butterflies {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.invitation-content {
+  position: relative;
+  z-index: 0;
+}
+
+.opening-butterfly {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(58px, 9vw, 98px);
+  opacity: 0;
+  filter: drop-shadow(0 7px 9px rgba(133, 66, 84, .28));
+  transform-origin: center;
+}
+
+.butterfly-fly-out { animation: butterfly-release var(--fly-time, 1.35s) var(--fly-delay, 0s) cubic-bezier(.16,.7,.25,1) forwards; }
+
+.butterfly-out-1 { --end-x: -65vw; --end-y: -48vh; --turn: -47deg; --fly-time: 1.25s; }
+.butterfly-out-2 { --end-x: -35vw; --end-y: -68vh; --turn: 31deg; --fly-time: 1.55s; --fly-delay: .06s; }
+.butterfly-out-3 { --end-x: 14vw; --end-y: -66vh; --turn: -26deg; --fly-time: 1.18s; --fly-delay: .13s; }
+.butterfly-out-4 { --end-x: 68vw; --end-y: -42vh; --turn: 48deg; --fly-time: 1.48s; --fly-delay: .03s; }
+.butterfly-out-5 { --end-x: -72vw; --end-y: -8vh; --turn: 35deg; --fly-time: 1.62s; --fly-delay: .16s; }
+.butterfly-out-6 { --end-x: 73vw; --end-y: 2vh; --turn: -43deg; --fly-time: 1.22s; --fly-delay: .08s; }
+.butterfly-out-7 { --end-x: -63vw; --end-y: 51vh; --turn: -37deg; --fly-time: 1.46s; }
+.butterfly-out-8 { --end-x: -24vw; --end-y: 70vh; --turn: 44deg; --fly-time: 1.68s; --fly-delay: .11s; }
+.butterfly-out-9 { --end-x: 31vw; --end-y: 68vh; --turn: -29deg; --fly-time: 1.32s; --fly-delay: .04s; }
+.butterfly-out-10 { --end-x: 67vw; --end-y: 47vh; --turn: 39deg; --fly-time: 1.58s; --fly-delay: .15s; }
+.butterfly-out-11 { --end-x: -78vw; --end-y: 23vh; --turn: 57deg; --fly-time: 1.36s; --fly-delay: .22s; }
+.butterfly-out-12 { --end-x: 79vw; --end-y: -21vh; --turn: -55deg; --fly-time: 1.7s; --fly-delay: .19s; }
+.butterfly-out-13 { --end-x: -48vw; --end-y: -59vh; --turn: -20deg; --fly-time: 1.42s; --fly-delay: .09s; }
+.butterfly-out-14 { --end-x: 49vw; --end-y: -61vh; --turn: 24deg; --fly-time: 1.28s; --fly-delay: .24s; }
+.butterfly-out-15 { --end-x: -45vw; --end-y: 63vh; --turn: 51deg; --fly-time: 1.6s; --fly-delay: .02s; }
+.butterfly-out-16 { --end-x: 48vw; --end-y: 65vh; --turn: -49deg; --fly-time: 1.38s; --fly-delay: .18s; }
+.butterfly-out-17 { --end-x: -82vw; --end-y: -27vh; --turn: 67deg; --fly-time: 1.5s; --fly-delay: .12s; }
+.butterfly-out-18 { --end-x: 82vw; --end-y: 28vh; --turn: -63deg; --fly-time: 1.24s; --fly-delay: .2s; }
+
+.butterfly-fly-out:nth-child(3n) { width: clamp(42px, 6vw, 70px); }
+.butterfly-fly-out:nth-child(4n) { width: clamp(68px, 11vw, 112px); }
+
+@keyframes butterfly-release {
+  0% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(.35); }
+  18% { opacity: 1; transform: translate(-50%, -50%) rotate(-13deg) scale(.78); }
+  86% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(var(--end-x) - 50%), calc(var(--end-y) - 50%)) rotate(var(--turn)) scale(1.12); }
+}
+
+@keyframes opening-veil-fade {
+  0% { background: rgba(249, 224, 231, .64); backdrop-filter: blur(5px); }
+  62% { background: rgba(249, 224, 231, .34); backdrop-filter: blur(2.5px); }
+  100% { background: rgba(249, 224, 231, 0); backdrop-filter: blur(0); }
+}
+@keyframes cover-twinkle { 0%,100% { opacity: .2; transform: scale(.55) rotate(0); } 50% { opacity: 1; transform: scale(1.35) rotate(45deg); } }
+@keyframes cover-button-pulse { 0%,100% { filter: drop-shadow(0 0 0 rgba(255,193,210,0)); } 50% { filter: drop-shadow(0 0 12px rgba(255,193,210,.9)); } }
+
+@media (max-width: 600px) {
+  .cover-copy { width: 76vw; min-height: 57vh; margin-top: clamp(62px, 9vh, 92px); }
+  .cover-invitation, .cover-message { font-size: clamp(11px, 3.4vw, 16px); }
+  .cover-copy h1 { font-size: clamp(48px, 13.8vw, 76px); }
+  .cover-name-ornament { width: 78%; margin: 13px 0 17px; }
+  .open-invitation-btn { width: 88%; min-height: 54px; font-size: 19px; }
+}
+
+@media (max-height: 690px) {
+  .cover-copy { min-height: 60vh; margin-top: 58px; transform: scale(.88); }
+  .open-invitation-btn { margin-top: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .invitation-cover, .open-invitation-btn, .cover-shimmer i { transition-duration: .01ms; }
+  .opening-butterfly { animation-duration: 1s; }
+}
+
+/* ============================================
    CUSTOM PROPERTIES & THEME
    ============================================ */
 :root {
